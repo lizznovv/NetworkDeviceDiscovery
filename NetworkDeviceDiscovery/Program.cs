@@ -31,7 +31,8 @@ namespace NetworkDeviceDiscovery
                 Console.WriteLine(host);
             }
 
-            
+            bool found = ArpScanner.ScanHost(interfaceInfo.IpAddress, "192.168.0.1");
+            Console.WriteLine(found);
 
         }
     }
