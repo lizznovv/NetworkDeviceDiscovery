@@ -25,12 +25,12 @@ namespace NetworkDeviceDiscovery.Network
                     if (address.Address.AddressFamily == AddressFamily.InterNetwork)
                     {
                         return new NetworkInterfaceInfo
-                        {
-                            InterfaceName = netInterface.Name,
-                            IpAddress = address.Address.ToString(),
-                            SubnetMask = address.IPv4Mask.ToString(),
-                            Gateway = properties.GatewayAddresses[0].Address.ToString()
-                        };
+                        (
+                            netInterface.Name,
+                            address.Address.ToString(),
+                            address.IPv4Mask.ToString(),
+                            properties.GatewayAddresses[0].Address.ToString()
+                        );
                     }
                 }
             }

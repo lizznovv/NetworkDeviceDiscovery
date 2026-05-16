@@ -25,15 +25,40 @@ namespace NetworkDeviceDiscovery
                 ipAddresses.Add(NetworkCalculator.BitsToIPAddress(bits));
             }
 
-            Console.WriteLine($"\nList of IPs: ");
+            List<DiscoveredDevice> discovered = new List<DiscoveredDevice>();
+            int total = ipAddresses.Count;
+            int current = 0;
+
             foreach (var host in ipAddresses)
             {
-                Console.WriteLine(host);
+                current++;
+
+                int percent = current * 100 / total;
+                string bar = new string('#', percent / 5) + new string('-', 20 - percent / 5);
+
+                Console.Write($"\r[{bar}] {percent}% ({current}/{total})");
+
+                DiscoveredDevice device = ArpScanner.ScanHost(interfaceInfo.IpAddress, host);
+                if (device != null)
+                {
+                    device.icmpAvailable = ICMPScanner.PingHost(host);
+                    discovered.Add(device);
+                    
+                }
             }
 
-            bool found = ArpScanner.ScanHost(interfaceInfo.IpAddress, "192.168.0.1");
-            Console.WriteLine(found);
+            Console.WriteLine("\nDiscovered devices:");
+            Console.WriteLine($"{"IP",-15} | {"MAC",-15} | STATUS");
+            Console.WriteLine(new string('-', 45));
 
+            foreach (var dev in discovered)
+            {
+                Console.WriteLine(
+                    $"{dev.ip,-15} | " +
+                    $"{dev.mac,-15} | " +
+                    $"Ping: {dev.icmpAvailable}"
+                );
+            }
         }
     }
 }

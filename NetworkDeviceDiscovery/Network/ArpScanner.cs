@@ -1,6 +1,7 @@
-﻿using SharpPcap;
-using SharpPcap.LibPcap;
+﻿using NetworkDeviceDiscovery.Models;
 using PacketDotNet;
+using SharpPcap;
+using SharpPcap.LibPcap;
 using System.Net;
 using System.Net.NetworkInformation;
 
@@ -35,21 +36,21 @@ namespace NetworkDeviceDiscovery.Network
             return device;
         }
 
-        public static bool ScanHost(string deviceIP, string targetIP)
+        public static DiscoveredDevice ScanHost(string deviceIP, string targetIP)
         {
             var devices = LibPcapLiveDeviceList.Instance;
 
             if (devices.Count < 1)
             {
                 Console.WriteLine("No devices found");
-                return false;
+                return null;
             }
 
             LibPcapLiveDevice device = deviceSearcher(deviceIP, devices);
             if (device == null)
             {
                 Console.WriteLine("Device not found");
-                return false;
+                return null;
             }
 
             device.Open();
@@ -104,21 +105,21 @@ namespace NetworkDeviceDiscovery.Network
                     //reply это или request
                     if (arp.Operation == ArpOperation.Response)
                     {
-                        Console.WriteLine($"ARP reply from {arp.SenderProtocolAddress}");
+                        //Console.WriteLine($"ARP reply from {arp.SenderProtocolAddress}");
 
                         //от нужного ли ip reply
                         if (arp.SenderProtocolAddress.ToString() == targetIP)
                         {
-                            Console.WriteLine($"Host found: {targetIP}");
-                            Console.WriteLine($"MAC: {arp.SenderHardwareAddress}");
+                            string ip = targetIP;
+                            string mac = arp.SenderHardwareAddress.ToString();
                             device.Close();
-                            return true;
+                            return new DiscoveredDevice(ip, mac, false);
                         }
                     }    
                 }
             }
             device.Close();
-            return false;
+            return null;
         }
     }
 }
